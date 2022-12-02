@@ -43,7 +43,7 @@ namespace laparca
 		read_line_until_empty_iterator() = default;
 		read_line_until_empty_iterator(const read_line_until_empty_iterator&) = default;
 		read_line_until_empty_iterator(Stream& stream)
-			: stream_{&stream}
+		: stream_{&stream}
 		, line_{get_line(stream_)}
 		{}
 
@@ -95,6 +95,78 @@ namespace laparca
 	};
 	template<typename T, typename Stream>
 	read_line_until_empty_iterator(Stream&) -> read_line_until_empty_iterator<T, Stream>;
+
+	/**
+	 *
+	 * This itereator read lines from an input stream. The end iterator
+	 * represents the end of file.
+	 */
+	template<typename Stream>
+	class read_line_iterator
+	{
+	public:
+		using iterator_category = std::input_iterator_tag;
+		using difference_type =  std::ptrdiff_t;
+		using value_type = std::string;
+		using pointer = const value_type*;
+		using reference = const value_type&;
+
+	public:
+		read_line_iterator() = default;
+		read_line_iterator(const read_line_iterator&) = default;
+		read_line_iterator(Stream& stream)
+		: stream_{&stream}
+		, line_{get_line(stream_)}
+		{}
+
+		static std::optional<std::string> get_line(std::optional<Stream*> stream)
+		{
+			if (!stream.has_value() || stream.value()->eof()) return {};
+
+			std::string line;
+			std::getline(*stream.value(), line);
+
+			return {line};
+		}
+
+		bool has_value() const
+		{
+			return stream_.has_value() && !stream_.value()->eof();
+		}
+
+		read_line_iterator& operator=(const read_line_iterator&) = default;
+		bool operator==(const read_line_iterator& it)
+		{
+			return !has_value() && !it.has_value();
+		}
+
+		bool operator!=(const read_line_iterator& it)
+		{
+			return has_value() || it.has_value();
+		}
+
+		value_type operator*()
+		{
+			return *line_;
+		}
+
+		read_line_iterator& operator++()
+		{
+			line_ = get_line(stream_);
+			return *this;
+		}
+
+		read_line_iterator& operator++(int)
+		{
+			return this->operator++();
+		}
+
+	private:
+		std::optional<Stream*> stream_;
+		std::optional<std::string> line_;
+	};
+	template<typename Stream>
+	read_line_iterator(Stream&) -> read_line_iterator<Stream>;
 
 	/**
 	 * Iterator that calls to a function that returns and optional value.
