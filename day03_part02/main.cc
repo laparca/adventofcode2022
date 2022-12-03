@@ -20,8 +20,21 @@ It search_reapeted(It start1, It end1, It start2, It end2)
     return end1;
 }
 
-#define T(a, b, c) *a > *b && *b > *c
-#define D(x) do { std::cout << " " << #x << std::endl; x} while(0)
+template<typename It>
+It& min(It& a) { return a; }
+
+template<typename It>
+It& min(It& a, It& b)
+{
+    return *a < *b ? a : b;
+}
+
+template<typename T, typename... Ts>
+T& min(T& a, T& b, Ts&&... rest)
+{
+    return min(min(a, b), rest...);
+}
+
 template<typename It>
 It search_reapeted(
     It start1, It end1,
@@ -30,22 +43,8 @@ It search_reapeted(
 {
     while(start1 != end1 && start2 != end2 && start3 != end3)
     {
-        #if 0
-        start1 > start2 > start3
-        start1 > start3 > start2
-        start2 > start1 > start3
-        start2 > start3 > start1
-        start3 > start1 > start2
-        start3 > start2 > start1
-        #endif
-        std::cout << *start1 << *start2 << *start3 << std::endl;
         if (*start1 == *start2 && *start2 == *start3) return start1;
-        else if (T(start1, start2, start3)) start3++;
-        else if (T(start1, start3, start2)) start2++;
-        else if (T(start2, start1, start3)) start3++;
-        else if (T(start2, start3, start1)) start1++;
-        else if (T(start3, start1, start2)) start2++;
-        else start1++;
+        min(start1, start2, start3)++;
     }
 
     return end1;
@@ -68,26 +67,17 @@ int main()
     {
         std::string line;
         std::getline(std::cin, line);
-        std::cout << "-----" << std::endl;
-        //std::cout << line << std::endl;
 
         auto start = std::begin(line);
         auto end = std::end(line);
         auto middle = start + (end - start) / 2;
 
-        //std::for_each(start, middle, [](auto a){ std::cout << a;});
-        //std::cout << std::endl;
-        //std::for_each(middle, end, [](auto a){ std::cout << a;});
-        //std::cout << std::endl;
-
         std::ranges::sort(start, middle);
         std::ranges::sort(middle, end);
-        //std::cout << item_priority(*search_reapeted(start, middle, middle, end)) << std::endl;
         total_priority += item_priority(*search_reapeted(start, middle, middle, end));
 
         std::ranges::sort(start, end);
         strings[count] = line;
-        std::cout << strings[count] << std::endl;
         count = (count + 1) % 3;
         if (count == 0)
         {
