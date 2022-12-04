@@ -52,22 +52,13 @@ int main()
     {
         std::string line;
         std::getline(std::cin, line);
-        std::cout << "-----" << std::endl;
-        std::cout << line << std::endl;
 
         auto start = std::begin(line);
         auto end = std::end(line);
         auto middle = start + (end - start) / 2;
 
-        std::for_each(start, middle, [](auto a){ std::cout << a;});
-        std::cout << std::endl;
-        std::for_each(middle, end, [](auto a){ std::cout << a;});
-        std::cout << std::endl;
-
         std::ranges::sort(start, middle);
         std::ranges::sort(middle, end);
-        std::cout << line << std::endl;
-        std::cout << item_priority(*search_reapeted(start, middle, middle, end)) << std::endl;
         total_priority += item_priority(*search_reapeted(start, middle, middle, end));
     }
 
