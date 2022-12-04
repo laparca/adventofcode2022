@@ -19,3 +19,10 @@ more readble.
 
 Elfs like to play Rock, Paper and Scissors. In this case I do a simpler case
 and I didn't try to do any esoteric.
+
+## Day 3
+
+
+## Day 4
+
+This day is time to work with range of numbers and check overlaping conditions.
