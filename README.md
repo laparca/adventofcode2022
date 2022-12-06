@@ -26,3 +26,8 @@ and I didn't try to do any esoteric.
 ## Day 4
 
 This day is time to work with range of numbers and check overlaping conditions.
+
+## Day 5
+## Day 6
+
+Too easy do it like me. I have to think in a best solution.
