@@ -35,3 +35,8 @@ Too easy do it like me. I have to think in a best solution.
 ## Day 7
 
 I'm not happy with the parser, but it was easy to do and it works.
+
+## Day 8
+
+It was difficult to me think because a get a cold. I'm not proud of this
+exercice.
