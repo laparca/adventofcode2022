@@ -187,6 +187,26 @@ namespace laparca
                 return NewContainer<value_type, allocator_type>{std::begin(container), std::end(container), allocator_type{}};
             }
         };
+
+        template<typename Func>
+        struct for_each
+        {
+            using is_algorithm = std::true_type;
+
+            template<typename Container>
+            requires is_container<Container>
+            constexpr auto operator()(Container&& container) const
+            {
+                for (const auto& v : container)
+                {
+                    func_(v);
+                }
+
+                return container;
+            }
+
+            std::decay_t<Func> func_;
+        };
     }
 
     namespace trans
@@ -242,6 +262,12 @@ namespace laparca
         laparca::algorithm::convert<Container, std::allocator> convert_to()
         {
             return {};
+        }
+
+        template<typename Func>
+        laparca::algorithm::for_each<Func> for_each(Func&& func)
+        {
+            return {std::forward<Func>(func)};
         }
     }
 }

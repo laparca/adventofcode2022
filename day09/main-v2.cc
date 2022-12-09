@@ -99,29 +99,6 @@ int main()
               }
           )
         ;
-        /*
-    while(!std::cin.eof())
-    {
-        std::string line;
-        std::getline(std::cin, line);
-        if (line.size() == 0) break;
-
-        auto values = line | laparca::trans::split(' ');
-
-        for (int i = 0; i < std::stol(values[1]); ++i)
-        {
-            rope[0] = rope[0] + movement[values[0]];
-
-            for (int i = 1; i < 10; i++)
-            {
-                auto new_pos = rope[i] + (rope[i-1] - rope[i]).sgn();
-                if (new_pos != rope[i-1])
-                    rope[i] = new_pos;
-            }
-            visited_second.insert(rope[1]);
-            visited_nineth.insert(rope[9]);
-        }
-    }*/
 
     std::cout << "Positions visited by tail = " << visited_second.size() << std::endl;
     std::cout << "Positions visited by end of rope = " << visited_nineth.size() << std::endl;
