@@ -46,6 +46,10 @@ namespace laparca
 	    { \
 	        return func(str); \
 	    } \
+        type operator()(const std::string& str) \
+        { \
+           return convert(str); \
+        } \
 	}
 	
 	LAPARCA_STR_CONVERTER__(int, std::stoi);

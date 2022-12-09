@@ -16,25 +16,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Foobar. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
-#include <iostream>
+#pragma once
+
 #include <iterators.hh>
-#include <conversions.hh>
-#include <algorithm.hh>
-#include <io_util.hh>
+#include <iostream>
 
-int main()
+namespace laparca
 {
-    auto ecl = laparca::istream_to_container{std::cin}
-                     | laparca::trans::convert_to<std::vector>() /* required due split. Split(T) return a std::vector<T>. In this case, istream_to_container cannot be used. */
-                     | laparca::trans::split(std::string{""})
-                     | laparca::trans::transform(
-                           laparca::trans::transform(laparca::str_converter<int>{}) | laparca::trans::accum(0)
-                       )
-                     | laparca::trans::sort(laparca::functional::greater{})
-                     ;
+    struct istream_to_container
+    {
+        using value_type = std::string;
+        istream_to_container(std::istream& stream) : stream_{stream} {}
+        istream_to_container(istream_to_container&& itc) : stream_{itc.stream_} {}
 
-    std::cout << "Max calories by one elf is " << *ecl.begin() << "; Max calories by top threee elfs is " << std::accumulate(ecl.begin(), ecl.begin() + 3, 0) << std::endl;
-    
-    return 0;
+        inline read_line_iterator<std::istream> begin()
+        {
+            return {stream_};
+        }
+
+        inline read_line_iterator<std::istream> end()
+        {
+            return {};
+        }
+
+    private:
+        std::istream& stream_;
+    };
 }
-
