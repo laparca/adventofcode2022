@@ -49,7 +49,7 @@ namespace laparca
  
             template<typename C>
             requires is_container<C>
-            constexpr auto operator()(C&& v)
+            constexpr auto operator()(C&& v) const
             {
                 return right_(left_(std::forward<C>(v)));
             }
@@ -117,7 +117,8 @@ namespace laparca
                 {
                     if (*it == delimiter_)
                     {
-                        tokens.emplace_back(token_start, it);
+                        if (it != token_start || split_contiguous_)
+                            tokens.emplace_back(token_start, it);
                         token_start = std::next(it);
                     }
                 }
@@ -129,6 +130,7 @@ namespace laparca
             }
             
             delimiter_type delimiter_;
+            bool split_contiguous_ = false;
         };
 
         template<typename T, typename Func>
@@ -207,6 +209,50 @@ namespace laparca
 
             std::decay_t<Func> func_;
         };
+        
+        template<typename Func, template<typename...> class Out, template<typename> class Allocator>
+        struct filter
+        {
+            using is_algorithm = std::true_type;
+            using func_type = std::decay_t<Func>;
+
+            template<typename C>
+            requires is_container<C>
+            constexpr auto operator()(C&& container) const
+            {
+                using value_type = typename std::decay_t<C>::value_type;
+                using allocator_type = Allocator<value_type>;
+                using result_type = Out<value_type, allocator_type>;
+                
+                result_type result;
+                for (const auto& value : container)
+                {
+                    if (filter_(value))
+                        result.emplace_back(value);
+                }
+                
+                return result;
+            }
+
+            func_type filter_;
+        };
+
+        struct concat
+        {
+            using is_algorithm = std::true_type;
+
+            template<typename C>
+            requires is_container<C> && is_container<typename std::decay_t<C>::value_type>
+            constexpr auto operator()(C&& container) const
+            {
+                using value_type = typename std::decay_t<C>::value_type;
+
+                value_type r;
+                for (const auto& value : container)
+                    std::copy(std::begin(value), std::end(value), std::back_inserter(r));
+                return r;
+            }
+        };
     }
 
     namespace trans
@@ -222,17 +268,29 @@ namespace laparca
         {
             return {std::forward<Func>(func)};
         }
+        
+        template<typename Func>
+        laparca::algorithm::transform<std::decay_t<Func>, std::vector, std::allocator> map(Func&& func)
+        {
+            return {std::forward<Func>(func)};
+        }
+
+        template<template<typename...> class Out, typename Func>
+        laparca::algorithm::transform<std::decay_t<Func>, Out, std::allocator> map(Func&& func)
+        {
+            return {std::forward<Func>(func)};
+        }
 
         template<typename Delimiter>
-        laparca::algorithm::split<std::decay_t<Delimiter>, std::vector, std::allocator> split(Delimiter&& delimiter)
+        laparca::algorithm::split<std::decay_t<Delimiter>, std::vector, std::allocator> split(Delimiter&& delimiter, bool split_contiguous = false)
         {
-            return {std::forward<Delimiter>(delimiter)};
+            return {std::forward<Delimiter>(delimiter), split_contiguous};
         }
 
         template<template<typename...> class Out, typename Delimiter>
-        laparca::algorithm::split<std::decay_t<Delimiter>, Out, std::allocator> split(Delimiter&& delimiter)
+        laparca::algorithm::split<std::decay_t<Delimiter>, Out, std::allocator> split(Delimiter&& delimiter, bool split_contiguous = false)
         {
-            return {std::forward<Delimiter>(delimiter)};
+            return {std::forward<Delimiter>(delimiter), split_contiguous};
         }
 
         template<typename T, typename Func>
@@ -268,6 +326,30 @@ namespace laparca
         laparca::algorithm::for_each<Func> for_each(Func&& func)
         {
             return {std::forward<Func>(func)};
+        }
+
+        template<typename Func>
+        laparca::algorithm::filter<Func, std::vector, std::allocator> filter(Func&& func)
+        {
+            return {std::forward<Func>(func)};
+        }
+        
+        template<template<typename...> class Out, typename Func>
+        laparca::algorithm::filter<Func, Out, std::allocator> filter(Func&& func)
+        {
+            return {std::forward<Func>(func)};
+        }
+
+        constexpr auto count = []<typename Func>(Func&& func)
+        {
+            return fold(0, [func](int c, const auto& v) {
+                return c + (func(v) ? 1 : 0);
+            });
+        };
+
+        constexpr laparca::algorithm::concat concat()
+        {
+            return {};
         }
     }
 }
