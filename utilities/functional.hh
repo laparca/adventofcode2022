@@ -22,7 +22,7 @@ namespace laparca
 {
     namespace functional
     {
-        struct plus
+        struct plus_t
         {
             template<typename A, typename B>
             constexpr auto operator()(A&& a, B&& b) const
@@ -30,8 +30,9 @@ namespace laparca
                 return a + b;
             }
         };
+        constexpr plus_t plus;
 
-        struct minus
+        struct minus_t
         {
             template<typename A, typename B>
             constexpr auto operator()(A&& a, B&& b) const
@@ -39,8 +40,9 @@ namespace laparca
                 return a - b;
             }
         };
+        constexpr minus_t minus;
 
-        struct mult
+        struct mult_t
         {
             template<typename A, typename B>
             constexpr auto operator()(A&& a, B&& b) const
@@ -48,8 +50,9 @@ namespace laparca
                 return a * b;
             }
         };
+        constexpr mult_t mult;
         
-        struct div
+        struct div_t
         {
             template<typename A, typename B>
             constexpr auto operator()(A&& a, B&& b) const
@@ -57,8 +60,9 @@ namespace laparca
                 return a / b;
             }
         };
+        constexpr div_t div;
 
-        struct less
+        struct less_t
         {
             template<typename A, typename B>
             constexpr bool operator()(A&& a, B&& b) const
@@ -66,8 +70,9 @@ namespace laparca
                 return a < b;
             }
         };
+        constexpr less_t less;
         
-        struct less_eq
+        struct less_eq_t
         {
             template<typename A, typename B>
             constexpr bool operator()(A&& a, B&& b) const
@@ -75,8 +80,9 @@ namespace laparca
                 return a <= b;
             }
         };
+        constexpr less_eq_t less_eq;
 
-        struct greater
+        struct greater_t
         {
             template<typename A, typename B>
             constexpr bool operator()(A&& a, B&& b) const
@@ -84,8 +90,9 @@ namespace laparca
                 return a > b;
             }
         };
+        constexpr greater_t greater;
         
-        struct greater_eq
+        struct greater_eq_t
         {
             template<typename A, typename B>
             constexpr bool operator()(A&& a, B&& b) const
@@ -93,8 +100,9 @@ namespace laparca
                 return a >= b;
             }
         };
+        constexpr greater_eq_t greater_eq;
 
-        struct equal_to
+        struct equal_to_t
         {
             template<typename A, typename B>
             constexpr bool operator()(A&& a, B&& b) const
@@ -102,17 +110,19 @@ namespace laparca
                 return a == b;
             }
         };
+        constexpr equal_to_t equal_to;
         
-        struct distinct_to
+        struct distinct_to_t
         {
             template<typename A, typename B>
             constexpr bool operator()(A&& a, B&& b) const
             {
-                return a == b;
+                return a != b;
             }
         };
+        constexpr distinct_to_t distinct_to;
 
-        struct id
+        struct id_t
         {
             template<typename T>
             constexpr T operator()(T&& t) const
@@ -120,5 +130,18 @@ namespace laparca
                 return std::forward<T>(t);
             }
         };
+        constexpr id_t id;
+
+        template<size_t N>
+        struct get_t
+        {
+            template<typename T>
+            constexpr auto operator()(T&& t) const
+            {
+                return std::get<N>(std::forward<T>(t));
+            }
+        };
+        template<size_t N>
+        constexpr get_t<N> get;
     }
 }

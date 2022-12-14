@@ -176,30 +176,32 @@ bool operator==(const node_ptr& a, const node_ptr& b)
         return false;
 }
 
-template<typename It>
-node_ptr create_number_from(It& start, It end)
+struct input_parser_t
 {
-    int num = *start - '0';
-    ++start;
-    while (*start != ',' && *start != ']' && start != end)
+    template <typename It>
+    node_ptr create_number_from(It &start, It end)
     {
-        num = num * 10 + (*start - '0');
+        int num = *start - '0';
         ++start;
+        while (*start != ',' && *start != ']' && start != end)
+        {
+            num = num * 10 + (*start - '0');
+            ++start;
+        }
+
+        --start;
+        return node_ptr{new node_leaf(num)};
     }
 
-    --start;
-    return node_ptr{new node_leaf(num)};
-}
-
-template<typename It>
-node_ptr create_list_from(It& start, It end)
-{
-    node_list list;
-    start++;
-    while(*start != ']' && start != end)
+    template <typename It>
+    node_ptr create_list_from(It &start, It end)
     {
-        switch(*start)
+        node_list list;
+        start++;
+        while (*start != ']' && start != end)
         {
+            switch (*start)
+            {
             case ',':
             case ']':
                 break;
@@ -209,41 +211,52 @@ node_ptr create_list_from(It& start, It end)
             default:
                 list.list_.emplace_back(create_number_from(start, end));
                 break;
+            }
+            start++;
         }
-        start++;
+
+        return node_ptr{new node_list(list)};
     }
 
-    return node_ptr{new node_list(list)};
-}
+    template <typename It>
+    node_ptr create_node_from(It start, It end)
+    {
+        return create_list_from(start, end);
+    }
 
-template<typename It>
-node_ptr create_node_from(It start, It end)
-{
-    return create_list_from(start, end);
-}
+    node_ptr create_node_from(const std::string &str)
+    {
+        return create_node_from(std::begin(str), std::end(str));
+    }
 
-node_ptr create_node_from(const std::string& str)
-{
-    return create_node_from(std::begin(str), std::end(str));
-}
+    template<typename It>
+    node_ptr operator()(It start, It end)
+    {
+        return create_node_from(start, end);
+    }
+
+    node_ptr operator()(const std::string& str)
+    {
+        return create_node_from(str);
+    }
+};
+input_parser_t input_parser;
 
 int main()
 {
     auto pairs = std::string{std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>()}
         | laparca::trans::split('\n', true) /* convert to std::vector<std::string> */
         | laparca::trans::split("") /* convert to std::vector<std::vector<std::string>> */
-        | laparca::trans::transform(laparca::trans::map((node_ptr(*)(const std::string&))create_node_from))
+        | laparca::trans::transform(laparca::trans::map(input_parser))
         ;
 
-    auto correct_order = pairs | laparca::trans::map([](const std::vector<node_ptr>& v) { return v[0] < v[1]; })
+    auto sum = pairs 
+        | laparca::trans::map([](const std::vector<node_ptr>& v) { return v[0] < v[1]; })
+        | laparca::trans::index(1) 
+        | laparca::trans::filter(laparca::functional::get<1>)
+        | laparca::trans::map(laparca::functional::get<0>)
+        | laparca::trans::accum(0)
         ;
-
-    int sum = 0;
-    for (size_t i = 0; i < correct_order.size(); ++i)
-    {
-        if (correct_order[i])
-            sum += i + 1;
-    }
 
     std::cout << "Result part 1 = " << sum << std::endl;
 
@@ -252,13 +265,13 @@ int main()
 
     using namespace std::string_literals;
 
-    auto two_node = create_node_from("[[2]]"s);
-    auto six_node = create_node_from("[[6]]"s);
+    auto two_node = input_parser("[[2]]"s);
+    auto six_node = input_parser("[[6]]"s);
 
     all_input.push_back(two_node);
     all_input.push_back(six_node);
 
-    auto sorted_input = all_input | laparca::trans::sort(laparca::functional::less{});
+    auto sorted_input = all_input | laparca::trans::sort(laparca::functional::less);
     int two_index = 0;
     int six_index = 0;
     for (size_t i = 0; i < sorted_input.size(); ++i)

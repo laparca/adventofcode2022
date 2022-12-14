@@ -33,14 +33,17 @@ namespace laparca
 	 * str_converter<int>::convert or str_converter<unsigned long>::convert.
 	 */
 	template<typename To>
-	struct str_converter;
+	struct str_converter_t;
+
+	template<typename To>
+	str_converter_t<To> str_converter;
 	
 	#ifdef LAPARCA_STR_CONVERTER__
 	#error LAPARCA_STR_CONVERTER__ was previously defined
 	#endif
 
 	#define LAPARCA_STR_CONVERTER__(type, func) \
-	template<> struct str_converter<type> \
+	template<> struct str_converter_t<type> \
 	{ \
 	    static type convert(const std::string& str) \
 	    { \

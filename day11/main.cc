@@ -75,8 +75,8 @@ monkey parse_monkey_info(const std::vector<std::string>& monkey_info)
 //    monkey_info[2] | laparca::trans::split(' ') | laparca::trans::for_each([](const auto& v) { std::cout << "'" << v << "', ";});
 //    std::cout << std::endl;
     return {
-        (monkey_info[1] | laparca::trans::split(':'))[1] | laparca::trans::split(',') | laparca::trans::transform<std::deque>(laparca::str_converter<mint>{}),
-        ((monkey_info[2] | laparca::trans::split(':'))[1] | laparca::trans::split(' '))[3] == "*" ? std::function<mint(mint, mint)>{laparca::functional::mult{}} : std::function<mint(mint, mint)>{laparca::functional::plus{}},
+        (monkey_info[1] | laparca::trans::split(':'))[1] | laparca::trans::split(',') | laparca::trans::transform<std::deque>(laparca::str_converter<mint>),
+        ((monkey_info[2] | laparca::trans::split(':'))[1] | laparca::trans::split(' '))[3] == "*" ? std::function<mint(mint, mint)>{laparca::functional::mult} : std::function<mint(mint, mint)>{laparca::functional::plus},
         operation_value_generator((monkey_info[2] | laparca::trans::split(' '))[5]),
         std::stoll((monkey_info[3] | laparca::trans::split(' '))[3]),
         std::stoi((monkey_info[4] | laparca::trans::split(' '))[5]),
@@ -154,7 +154,7 @@ int main(int argc, char** argv)
     }
 //    monkeys | laparca::trans::for_each([](const auto& m){ std::cout << m << "------------" << std::endl;});
 
-    auto sort_inspected = monkeys | laparca::trans::transform([](const auto& m) { return m.items_inspected; }) | laparca::trans::for_each([](const auto& i) { std::cout << i << ",";}) | laparca::trans::sort(laparca::functional::greater{});
+    auto sort_inspected = monkeys | laparca::trans::transform([](const auto& m) { return m.items_inspected; }) | laparca::trans::for_each([](const auto& i) { std::cout << i << ",";}) | laparca::trans::sort(laparca::functional::greater);
     std::cout << std::endl;
     std::cout << sort_inspected[0] * sort_inspected[1] << std::endl;
     return 0;

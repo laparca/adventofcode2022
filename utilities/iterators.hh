@@ -75,7 +75,7 @@ namespace laparca
 
 		T operator*()
 		{
-			return str_converter<T>::convert(*line_);
+			return str_converter_t<T>::convert(*line_);
 		}
 
 		read_line_until_empty_iterator& operator++()

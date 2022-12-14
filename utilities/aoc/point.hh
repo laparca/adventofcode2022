@@ -25,6 +25,13 @@ struct point
 {
     int x;
     int y;
+
+    point sgn() {
+        return {
+            x > 0 ? 1 : x < 0 ? -1 : 0,
+            y > 0 ? 1 : y < 0 ? -1 : 0
+        };
+    }
 };
 
 bool operator==(const point& a, const point& b)
@@ -42,9 +49,23 @@ point operator+(const point& a, const point& b)
     return {a.x+b.x, a.y+b.y};
 }
 
+point& operator+=(point& a, const point& b)
+{
+    a.x += b.x;
+    a.y += b.y;
+    return a;
+}
+
 point operator-(const point& a, const point& b)
 {
     return {a.x-b.x, a.y-b.y};
+}
+
+point& operator-=(point& a, const point& b)
+{
+    a.x -= b.x;
+    a.y -= b.y;
+    return a;
 }
 
 float distance(const point& a, const point& b)
