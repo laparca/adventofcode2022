@@ -30,7 +30,7 @@ namespace laparca
     namespace algorithm
     {
         template<typename T>
-        concept is_algorithm = std::is_same_v<typename T::is_algorithm, std::true_type>;
+        concept is_algorithm = std::is_same_v<typename std::decay_t<T>::is_algorithm, std::true_type>;
 
         template<typename T>
         concept is_container = requires(T v)
@@ -83,7 +83,8 @@ namespace laparca
             requires is_container<Container>
             constexpr auto operator()(Container&& c) const
             {
-                using value_type = std::decay_t<std::invoke_result_t<F, typename std::decay_t<Container>::value_type>>;
+                using contained_type = typename std::decay_t<Container>::value_type;
+                using value_type = std::decay_t<std::invoke_result_t<F, contained_type>>;
                 /*using allocator_type = Allocator<value_type>;*/
 
                 Out<value_type/*, allocator_type*/> results/*(allocator_type{})*/;
@@ -210,7 +211,7 @@ namespace laparca
             std::decay_t<Func> func_;
         };
         
-        template<typename Func, template<typename...> class Out/*, template<typename> class Allocator*/>
+        template<typename Func/*, template<typename...> class Out, template<typename> class Allocator*/>
         struct filter
         {
             using is_algorithm = std::true_type;
@@ -220,15 +221,15 @@ namespace laparca
             requires is_container<C>
             constexpr auto operator()(C&& container) const
             {
-                using value_type = typename std::decay_t<C>::value_type;
+                //using value_type = typename std::decay_t<C>::value_type;
                 /*using allocator_type = Allocator<value_type>;*/
-                using result_type = Out<value_type/*, allocator_type*/>;
+                using result_type = std::decay_t<C>;
                 
                 result_type result;
                 for (const auto& value : container)
                 {
                     if (filter_(value))
-                        result.emplace_back(value);
+                        result.push_back(value);
                 }
                 
                 return result;
@@ -251,6 +252,39 @@ namespace laparca
                 for (const auto& value : container)
                     std::copy(std::begin(value), std::end(value), std::back_inserter(r));
                 return r;
+            }
+        };
+
+        struct first
+        {
+            using is_algorithm = std::true_type;
+            template<typename C>
+            requires is_container<C>
+            constexpr auto operator()(C&& container) const
+            {
+                return *std::begin(container);
+            }
+        };
+
+        struct last
+        {
+            using is_algorithm = std::true_type;
+            template<typename C>
+            requires is_container<C>
+            constexpr auto operator()(C&& container) const
+            {
+                return *(std::end(container)-1);
+            }
+        };
+
+        struct first_last
+        {
+            using is_algorithm = std::true_type;
+            template<typename C>
+            requires is_container<C>
+            constexpr auto operator()(C&& container) const
+            {
+                return std::make_tuple(*std::begin(container), *(std::end(container)-1));
             }
         };
     }
@@ -329,16 +363,17 @@ namespace laparca
         }
 
         template<typename Func>
-        laparca::algorithm::filter<Func, std::vector/*, std::allocator*/> filter(Func&& func)
+        laparca::algorithm::filter<Func/*, std::vector, std::allocator*/> filter(Func&& func)
         {
             return {std::forward<Func>(func)};
         }
-        
+#if 0
         template<template<typename...> class Out, typename Func>
         laparca::algorithm::filter<Func, Out/*, std::allocator*/> filter(Func&& func)
         {
             return {std::forward<Func>(func)};
         }
+#endif
 
         constexpr auto count = []<typename Func>(Func&& func)
         {
@@ -364,5 +399,9 @@ namespace laparca
         {
             return {};
         }
+
+        constexpr laparca::algorithm::first first;
+        constexpr laparca::algorithm::last last;
+        constexpr laparca::algorithm::first_last first_last;
     }
 }

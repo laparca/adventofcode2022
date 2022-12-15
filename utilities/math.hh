@@ -16,42 +16,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Foobar. If not, see <https://www.gnu.org/licenses/>.
  ******************************************************************************/
-#include <iostream>
-#include <algorithm>
+#pragma once
 
-template<typename It>
-bool are_repeated(It start, It stop)
+namespace laparca
 {
-    for(;start != stop; ++start)
+    template<typename T>
+    int sgn(T&& value)
     {
-        if (std::find(std::next(start), stop, *start) != stop)
-            return true;
+        return value < 0 ? -1 : value > 0 ? 1 : 0;
     }
-
-    return false;
-}
-constexpr int width = 14;
-
-int main()
-{
-    while(!std::cin.eof())
-    {
-        int count = width;
-
-        std::string line;
-        std::getline(std::cin, line);
-
-        auto start = std::begin(line);
-        auto stop = std::begin(line) + width;
-
-        while (are_repeated(start, stop))
-        {
-            start++;
-            stop++;
-            count++;
-        }
-
-        std::cout << count << std::endl;
-    }
-    return 0;
 }

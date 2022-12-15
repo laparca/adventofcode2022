@@ -24,7 +24,7 @@
 
 struct parse_point
 {
-    point operator()(const std::string& str)
+    point<int> operator()(const std::string& str)
     {
         auto values = str
             | laparca::trans::split(',')
@@ -36,16 +36,16 @@ struct parse_point
 
 constexpr point start{500, 0};
 
-std::tuple<std::vector<std::string>, point, point> prepare_canvas(const std::vector<std::vector<point>>& points)
+std::tuple<std::vector<std::string>, point<int>, point<int>> prepare_canvas(const std::vector<std::vector<point<int>>>& points)
 {
     // Get min, max bounds for canvas        
     auto plain_pairs = points | laparca::trans::concat();
     plain_pairs.push_back(start);
-    const auto order_horizontal = plain_pairs | laparca::trans::sort([](const point& v1, const point& v2) { return v1.x < v2.x; });
-    const auto order_vertical   = plain_pairs | laparca::trans::sort([](const point& v1, const point& v2) { return v1.y < v2.y; });
-    const point top_left    {order_horizontal[0                        ].x, order_vertical[0                      ].y};
-    const point bottom_right{order_horizontal[order_horizontal.size()-1].x, order_vertical[order_vertical.size()-1].y};
-    const point size = bottom_right - top_left + point{1, 1};
+    const auto order_horizontal = plain_pairs | laparca::trans::sort([](const point<int>& v1, const point<int>& v2) { return v1.x < v2.x; });
+    const auto order_vertical   = plain_pairs | laparca::trans::sort([](const point<int>& v1, const point<int>& v2) { return v1.y < v2.y; });
+    const point<int> top_left    {order_horizontal[0                        ].x, order_vertical[0                      ].y};
+    const point<int> bottom_right{order_horizontal[order_horizontal.size()-1].x, order_vertical[order_vertical.size()-1].y};
+    const point<int> size = bottom_right - top_left + point{1, 1};
 
     std::cout << top_left << ", " << bottom_right <<  ", " << (bottom_right - top_left)<< std::endl;
     
@@ -57,11 +57,11 @@ std::tuple<std::vector<std::string>, point, point> prepare_canvas(const std::vec
 
     for (auto& point_chain : points)
     {
-        point from = point_chain[0];
-        std::for_each(std::begin(point_chain) + 1, std::end(point_chain), [top_left, &from, &canvas](const point& to)
+        point<int> from = point_chain[0];
+        std::for_each(std::begin(point_chain) + 1, std::end(point_chain), [top_left, &from, &canvas](const point<int>& to)
         {
-            point desp = (to - from).sgn();
-            point act = from;
+            point<int> desp = (to - from).sgn();
+            point<int> act = from;
             while(true)
             {
                 canvas[act.y][act.x - top_left.x] = '#';
@@ -75,7 +75,7 @@ std::tuple<std::vector<std::string>, point, point> prepare_canvas(const std::vec
     return {canvas, top_left, bottom_right};
 }
 
-char get_value(const std::vector<std::string>& canvas, const point& position)
+char get_value(const std::vector<std::string>& canvas, const point<int>& position)
 {
     /* by default, out of bound is an empty location */
     if (position.y < 0 || position.x < 0 || position.y >= (int)canvas.size() || position.x >= (int)canvas[0].size())
@@ -84,12 +84,12 @@ char get_value(const std::vector<std::string>& canvas, const point& position)
     return canvas[position.y][position.x];
 }
 
-void set_value(std::vector<std::string>& canvas, const point& position, const char val)
+void set_value(std::vector<std::string>& canvas, const point<int>& position, const char val)
 {
     canvas[position.y][position.x] = val;
 }
 
-bool is_valid(const point& p, const size_t max_x, const size_t max_y)
+bool is_valid(const point<int>& p, const size_t max_x, const size_t max_y)
 {
     return p.x >= 0 && p.x < (int)max_x && p.y >= 0 && p.y < (int)max_y;
 }
@@ -101,25 +101,25 @@ bool is_valid(const point& p, const size_t max_x, const size_t max_y)
  * @return true if the sand can be put
  * @return false if the sand got out of the canvas
  */
-bool put_sand_unit(std::vector<std::string>& canvas, const point& top_left)
+bool put_sand_unit(std::vector<std::string>& canvas, const point<int>& top_left)
 {
-    const point correction{-top_left.x, 0};
-    const point down[] = {
+    const point<int> correction{-top_left.x, 0};
+    const point<int> down[] = {
         { 0, 1}, /* down */
         {-1, 1}, /* down_left */
         { 1, 1}  /* down_right */
     };
     const size_t width = canvas[0].size();
     const size_t height = canvas.size();
-    const point the_begining{start + correction};
-    constexpr point invalid{-1, -1};
+    const point<int> the_begining{start + correction};
+    constexpr point<int> invalid{-1, -1};
 
     if (get_value(canvas, the_begining) != ' ') 
         return false;
 
-    for (point act{the_begining}; is_valid(act, width, height);)
+    for (point<int> act{the_begining}; is_valid(act, width, height);)
     {
-        point next{invalid};
+        point<int> next{invalid};
         for (const auto& direction : down)
         {
             if (get_value(canvas, act + direction) == ' ')
@@ -175,7 +175,7 @@ int main()
         const point size{br - tl};
         const point start{tl.x - size.y, br.y + 2};
         const point end  {br.x + size.y, br.y + 2};
-        std::vector<point> bottom{start, end};
+        std::vector<point<int>> bottom{start, end};
         pairs.push_back(bottom);
 
         auto [canvas_pt2, top_left_pt2, bottom_right_pt2] = prepare_canvas(pairs);

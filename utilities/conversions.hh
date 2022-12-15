@@ -20,6 +20,7 @@
 
 #include <string>
 #include <id.hh>
+#include <type_traits>
 
 namespace laparca
 {
@@ -45,11 +46,12 @@ namespace laparca
 	#define LAPARCA_STR_CONVERTER__(type, func) \
 	template<> struct str_converter_t<type> \
 	{ \
+		using is_algorithm = std::true_type; \
 	    static type convert(const std::string& str) \
 	    { \
 	        return func(str); \
 	    } \
-        type operator()(const std::string& str) \
+        type operator()(const std::string& str) const \
         { \
            return convert(str); \
         } \

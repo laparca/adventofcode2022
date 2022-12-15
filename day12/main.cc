@@ -25,7 +25,7 @@
 
 struct visited_point
 {
-    point p;
+    point<int> p;
     int steps;
     char elevation;
 };
@@ -56,14 +56,14 @@ std::ostream& operator<<(std::ostream& s, const visited_point& p)
 }
 
 using terrain_map = std::vector<std::string>;
-std::tuple<terrain_map, point, point> prepare_data(const terrain_map& original_map)
+std::tuple<terrain_map, point<int>, point<int>> prepare_data(const terrain_map& original_map)
 {
     const int width = original_map[0].size();
     const int height = original_map.size();
 
     terrain_map prepared_map{original_map};
-    point start{0, 0};
-    point end{0, 0};
+    point<int> start{0, 0};
+    point<int> end{0, 0};
 
 
     for (int y = 0; y < height; ++y)
@@ -87,7 +87,7 @@ std::tuple<terrain_map, point, point> prepare_data(const terrain_map& original_m
     return {prepared_map, start, end};
 }
 
-char get_value(const terrain_map& map, const point& p)
+char get_value(const terrain_map& map, const point<int>& p)
 {
     return map[p.y][p.x];
 }
@@ -97,18 +97,18 @@ bool is_valid_difference_reverse(char from, char to)
     if (from <= to) return true;
     return from - to <=1;
 }
-std::vector<point> calculate_movements_reverse(const point& act, const terrain_map& map)
+std::vector<point<int>> calculate_movements_reverse(const point<int>& act, const terrain_map& map)
 {
     const int width = map[0].size();
     const int height = map.size();
     const char height_start = map[act.y][act.x];
 
-    const point up    = act + point{ 0, -1};
-    const point down  = act + point{ 0,  1};
-    const point left  = act + point{-1,  0};
-    const point right = act + point{ 1,  0};
+    const point<int> up    = act + point{ 0, -1};
+    const point<int> down  = act + point{ 0,  1};
+    const point<int> left  = act + point{-1,  0};
+    const point<int> right = act + point{ 1,  0};
 
-    std::vector<point> next_movements;
+    std::vector<point<int>> next_movements;
 
     if (act.y != 0 && is_valid_difference_reverse(height_start, get_value(map, up)))
         next_movements.emplace_back(up);
@@ -123,7 +123,7 @@ std::vector<point> calculate_movements_reverse(const point& act, const terrain_m
 }
 
 template<typename Func>
-std::tuple<int, std::vector<visited_point>> sortest_path(const point& start, const point& end, const std::vector<std::string>& map, Func movements)
+std::tuple<int, std::vector<visited_point>> sortest_path(const point<int>& start, const point<int>& end, const std::vector<std::string>& map, Func movements)
 {
     std::vector<visited_point> visited{ };
     std::deque<visited_point> candidates{ {start, 0, map[start.y][start.x]} };
@@ -144,7 +144,7 @@ std::tuple<int, std::vector<visited_point>> sortest_path(const point& start, con
 
         auto values = movements(act.p, map);
 
-        auto sorted_values = values | laparca::trans::sort([end](const point &a, const point &b)
+        auto sorted_values = values | laparca::trans::sort([end](const point<int>& a, const point<int>& b)
                                                            { return distance(a, end) < distance(b, end); });
         for (const auto &candidate : sorted_values)
         {

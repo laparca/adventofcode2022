@@ -20,60 +20,72 @@
 
 #include <cmath>
 #include <iostream>
+#include <math.hh>
 
+template<typename T=int>
 struct point
 {
-    int x;
-    int y;
+    T x;
+    T y;
 
     point sgn() {
         return {
-            x > 0 ? 1 : x < 0 ? -1 : 0,
-            y > 0 ? 1 : y < 0 ? -1 : 0
+            laparca::sgn(x),
+            laparca::sgn(y)
         };
     }
 };
+template<typename T>
+point(T, T) -> point<T>;
 
-bool operator==(const point& a, const point& b)
+template<typename T>
+bool operator==(const point<T>& a, const point<T>& b)
 {
     return a.x == b.x && a.y == b.y;
 }
 
-bool operator!=(const point& a, const point& b)
+template<typename T>
+bool operator!=(const point<T>& a, const point<T>& b)
 {
     return !(a == b);
 }
 
-point operator+(const point& a, const point& b)
+template<typename T>
+point<T> operator+(const point<T>& a, const point<T>& b)
 {
     return {a.x+b.x, a.y+b.y};
 }
 
-point& operator+=(point& a, const point& b)
+template<typename T>
+point<T>& operator+=(point<T>& a, const point<T>& b)
 {
     a.x += b.x;
     a.y += b.y;
     return a;
 }
 
-point operator-(const point& a, const point& b)
+template<typename T>
+point<T> operator-(const point<T>& a, const point<T>& b)
 {
     return {a.x-b.x, a.y-b.y};
 }
 
-point& operator-=(point& a, const point& b)
+template<typename T>
+point<T>& operator-=(point<T>& a, const point<T>& b)
 {
     a.x -= b.x;
     a.y -= b.y;
     return a;
 }
 
-float distance(const point& a, const point& b)
+template<typename T>
+float distance(const point<T>& a, const point<T>& b)
 {
     return std::sqrt(std::pow(b.x - a.x, 2) + std::pow(b.y - a.y, 2));
 }
 
-std::ostream& operator<<(std::ostream& s, const point& p)
+template<typename T>
+std::ostream& operator<<(std::ostream& s, const point<T>& p)
 {
     return (s << "{ x: " << p.x << ", y: " << p.y << " }");
 }
